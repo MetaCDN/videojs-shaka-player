@@ -2,7 +2,7 @@
   "name": "videojs-shaka-player",
   "version": "0.1.0",
   "description": "Shaka Player playback technology for Video.js",
-  "main": "videojs.shaka.js",
+  "main": "src/videojs.shaka.dev.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
