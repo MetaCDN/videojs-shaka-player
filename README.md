@@ -10,14 +10,23 @@ Shaka Player Playback Technology allows Video.js users to utilize [Shaka-Player]
 ### Build
 Build script requires npm, bower and grunt.
 
-Run ./build.sh
+If you don't have bower or grunt, run:
+
+```
+sudo npm install grunt
+sudo npm install grunt-cli
+sudo npm install bower
+```
+
+Finally, run ./build.sh
 
 ### Usage
-  - Include video.shaka.js file in the html page.
+  - Include shaka-player.compiled.js and video.shaka.dev.js file in the html page.
   - Specify "shaka" in the techOrder array as needed.
+  - Look at the included example for guidance.
   
 ### Example
-An example is provided under /example directory. Run the build script before using this example.
+An example is provided under the /example directory. Run the build script before using this example.
 
 ### Icon
 The provided example is using the cog icon from [videojs/font](https://github.com/videojs/font). You are free to use any other icon font to replace the existing one with the help of extra css rules.
