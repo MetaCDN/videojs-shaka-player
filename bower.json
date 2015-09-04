@@ -1,0 +1,29 @@
+{
+  "name": "videojs-shaka-player",
+  "version": "0.1.0",
+  "authors": [
+    "Yudong Li <yudong.li@metacdn.com>"
+  ],
+  "description": "Shaka Player playback technology for Video.js",
+  "license": "Apache-2.0",
+  "homepage": "http://www.metacdn.com",
+  "main": [
+     "src/videojs.shaka.dev.js"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "video.js": "~4.12.15",
+    "videojs-font": "git://github.com/videojs/font.git#v1.3.0",
+    "shaka-player": "git://github.com/google/shaka-player.git#v1.3.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/MetaCDN/videojs-shaka-player.git"
+  }
+}
