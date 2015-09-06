@@ -19,6 +19,10 @@ Run ./build.sh
 ### Example
 An example is provided under /example directory. Run the build script before using this example.
 
+### Screenshot
+Here is a screenshot of videojs-shaka-player playing an MPEG DASH (VP9/Vorbis) VoD playlist. By default, the video is played back adaptively. The quality menu (gear) is automatically populated based on the size and bitrates of the video streams listed in the playlist. You can manually select a video quality to override auto (adaptive) mode, and switch back to auto mode at any time.
+![Screenshot](example/screenshot.png)
+
 ### Icon
 The provided example is using the cog icon from [videojs/font](https://github.com/videojs/font). You are free to use any other icon font to replace the existing one with the help of extra css rules.
 
