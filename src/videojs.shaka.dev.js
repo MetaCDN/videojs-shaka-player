@@ -95,8 +95,10 @@ function initMenus(player, shakaPlayer) {
               }
               this.className = this.className + " vjs-selected";
               shakaPlayer.enableAdaptation(false);
-              shakaPlayer.selectVideoTrack(index, true);
-              player.trigger('waiting');
+              shakaPlayer.selectVideoTrack(index, false);
+              // TODO: Make opt_clearBuffer a property of this tech 
+              // If above is set to true, you may wish to uncomment the below
+              // player.trigger('waiting');
           })
           shakaMenuContent.appendChild(el);
         }())
@@ -107,4 +109,4 @@ function initMenus(player, shakaPlayer) {
             controlBar.appendChild(shakaButton);
         }
     }
-}                                                       
+}                      

@@ -10,17 +10,26 @@ Shaka Player Playback Technology allows Video.js users to utilize [Shaka-Player]
 ### Build
 Build script requires npm, bower and grunt.
 
-Run ./build.sh
+If you don't have bower or grunt, run:
+
+```
+sudo npm install grunt
+sudo npm install grunt-cli
+sudo npm install bower
+```
+
+Finally, run ./build.sh
 
 ### Usage
-  - Include video.shaka.js file in the html page.
+  - Include shaka-player.compiled.js and video.shaka.dev.js file in the html page.
   - Specify "shaka" in the techOrder array as needed.
+  - Look at the included example for guidance.
   
 ### Example
-An example is provided under /example directory. Run the build script before using this example.
+An example is provided under the /example directory. Run the build script before using this example.
 
 ### Screenshot
-Here is a screenshot of videojs-shaka-player playing an MPEG DASH (VP9/Vorbis) VoD playlist. By default, the video is played back adaptively. The quality menu (gear) is automatically populated based on the size and bitrates of the video streams listed in the playlist. You can manually select a video quality to override auto (adaptive) mode, and switch back to auto mode at any time.
+Below is a screenshot of videojs-shaka-player playing an MPEG DASH (VP9/Vorbis) VoD playlist. By default, the video is played back adaptively. The quality menu (gear) is automatically populated based on the size and bitrates of the video streams listed in the playlist. You can manually select a video quality to override auto (adaptive) mode, and switch back to auto mode at any time.
 ![Screenshot](example/screenshot.png)
 
 ### Icon
