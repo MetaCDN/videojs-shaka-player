@@ -38,11 +38,22 @@ module.exports = function(grunt) {
            'js/shaka-player.compiled.debug.js': 'shaka-player/shaka-player.compiled.debug.js'
          }
        }
-    } 
+    },
+    connect: {
+      server: {
+        options: {
+          port: 4000,
+          hostname: 'localhost',
+          base: './',
+          keepalive: true
+        }
+      }
+    }
   });
 
   grunt.loadNpmTasks('grunt-bowercopy');
-  
+  grunt.loadNpmTasks('grunt-contrib-connect');
+
   // Default task(s).
   grunt.registerTask('default', ['bowercopy']);
 
