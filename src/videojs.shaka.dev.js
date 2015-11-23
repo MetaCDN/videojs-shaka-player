@@ -2,7 +2,7 @@ videojs.Shaka = videojs.Html5.extend({
     init: function (player, options, ready) {
         videojs.Html5.call(this, player, options, ready);
         shaka.polyfill.installAll();
-        var video = document.getElementById('video').getElementsByTagName('video')[0];
+        var video = document.getElementById(player.id_).getElementsByTagName('video')[0];
         var shakaPlayer = new shaka.player.Player(video);
         var estimator = new shaka.util.EWMABandwidthEstimator();
         var source = new shaka.player.DashVideoSource(options.source.src, null, estimator);
