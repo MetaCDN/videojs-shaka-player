@@ -3,7 +3,6 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-      
     bowercopy: {
        options: {
          srcPrefix: 'bower_components'
@@ -13,13 +12,13 @@ module.exports = function(grunt) {
             destPrefix: 'dist'
          },
          files: {
-           'video.dev.js': 'video.js/dist/video-js/video.dev.js',
-           'videojs.css': 'video.js/dist/video-js/video-js.css',
-           'font/vjs.eot': 'video.js/dist/video-js/font/vjs.eot',
-           'font/vjs.svg': 'video.js/dist/video-js/font/vjs.svg',
-           'font/vjs.ttf': 'video.js/dist/video-js/font/vjs.ttf',
-           'font/vjs.woff': 'video.js/dist/video-js/font/vjs.woff',
-           'swf/video-js.swf': 'video.js/dist/video-js/video-js.swf'
+           'video.js': 'video.js/dist/video.js',
+           'videojs.css': 'video.js/dist/video-js.css',
+           'font/VideoJS.eot': 'video.js/dist/font/VideoJS.eot',
+           'font/VideoJS.svg': 'video.js/dist/font/VideoJS.svg',
+           'font/VideoJS.ttf': 'video.js/dist/font/VideoJS.ttf',
+           'font/VideoJS.woff': 'video.js/dist/font/VideoJS.woff',
+           'swf/video-js.swf': 'video.js/dist/video-js.swf'
          }
        },
        'videojs-font': {
@@ -38,11 +37,22 @@ module.exports = function(grunt) {
            'js/shaka-player.compiled.debug.js': 'shaka-player/shaka-player.compiled.debug.js'
          }
        }
-    } 
+    },
+    connect: {
+      server: {
+        options: {
+          port: 4000,
+          hostname: 'localhost',
+          base: './',
+          keepalive: true
+        }
+      }
+    }
   });
 
   grunt.loadNpmTasks('grunt-bowercopy');
-  
+  grunt.loadNpmTasks('grunt-contrib-connect');
+
   // Default task(s).
   grunt.registerTask('default', ['bowercopy']);
 
