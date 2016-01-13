@@ -121,5 +121,5 @@
     }
   }
 
-  videojs.registerComponent('Shaka', Shaka);
+  videojs.registerTech('Shaka', Shaka);
 })();
