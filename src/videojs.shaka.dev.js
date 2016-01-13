@@ -57,7 +57,7 @@
           selected.className = selected.className.replace('vjs-selected', '')
         }
         this.className = this.className + " vjs-selected";
-        shakaPlayer.enableAdaptation(true);
+        shakaPlayer.configure({ 'enableAdaptation': true });
       });
       shakaMenuContent.appendChild(el);
 
@@ -78,7 +78,7 @@
               selected.className = selected.className.replace('vjs-selected', '')
             }
             this.className = this.className + " vjs-selected";
-            shakaPlayer.enableAdaptation(false);
+            shakaPlayer.configure({ 'enableAdaptation': false });
             shakaPlayer.selectVideoTrack(index, false);
             // TODO: Make opt_clearBuffer a property of this tech
             // If above is set to true, you may wish to uncomment the below
