@@ -87,10 +87,10 @@
           shakaMenuContent.appendChild(el);
         }())
       }
-      var controlBar = playerEL.parentNode.querySelectorAll('.vjs-control-bar')[0];
+      var controlBar = playerEL.parentNode.querySelector('.vjs-control-bar');
 
       if (controlBar) {
-        controlBar.appendChild(shakaButton);
+        controlBar.insertBefore(shakaButton, controlBar.lastChild);
       }
     }
   })
