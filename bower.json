@@ -18,9 +18,9 @@
     "tests"
   ],
   "dependencies": {
-    "video.js": "~4.12.15",
+    "video.js": "~5.4.6",
     "videojs-font": "git://github.com/videojs/font.git#v1.3.0",
-    "shaka-player": "git://github.com/google/shaka-player.git#v1.3.2"
+    "shaka-player": "git://github.com/google/shaka-player.git#v1.6.2"
   },
   "repository": {
     "type": "git",

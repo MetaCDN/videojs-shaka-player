@@ -1,84 +1,68 @@
-videojs.Shaka = videojs.Html5.extend({
-    init: function (player, options, ready) {
-        videojs.Html5.call(this, player, options, ready);
-        shaka.polyfill.installAll();
-        var video = document.getElementById(player.id_).getElementsByTagName('video')[0];
-        var shakaPlayer = new shaka.player.Player(video);
-        var estimator = new shaka.util.EWMABandwidthEstimator();
-        var source = new shaka.player.DashVideoSource(options.source.src, null, estimator);
-        shakaPlayer.load(source).then(function(){initMenus(player, shakaPlayer)});
-    }
-})
+(function() {
+  'use strict';
 
-videojs.Shaka.isSupported = function(){
-    return !!window.MediaSource;
-};
+  var Html5 = videojs.getComponent('Html5');
 
-videojs.Shaka.canPlaySource = function(srcObj){
-    if (srcObj.type === 'application/dash+xml') {
-        return 'maybe';
-    } else {
-        return '';
-    }
-};
+  var Shaka = videojs.extend(Html5, {
+    constructor: function(options, ready) {
+      var player = this;
 
-videojs.options.techOrder.unshift('shaka');
+      // Remove the application/dash+xml source so that the browser
+      // doesn't try to play it
+      var source = options.source;
+      delete options.source;
 
-function setInnerText(element, text) {
-    if(typeof element === 'undefined') {
-      return false;
-    }
-    var textProperty = ('innerText' in element) ? 'innerText' : 'textContent';
-    try {
-      element[textProperty] = text;
-    } catch(anException) {
-      element.setAttribute('innerText', text);
-    }
-}
-                                                       
-function initMenus(player, shakaPlayer) {
-	player.options()['playbackRates'] = [];
-    var playerEL = player.el();
-    playerEL.className += ' vjs-shaka';
+      Html5.call(player, options, ready);
+      shaka.polyfill.installAll();
 
-    var shakaButton = document.createElement('div');
-    shakaButton.setAttribute('class', 'vjs-shaka-button vjs-menu-button vjs-control vjs-icon-cog');
+      var video = player.el();
+      this.shakaPlayer = new shaka.player.Player(video);
+      var estimator = new shaka.util.EWMABandwidthEstimator();
+      var shakaSource = new shaka.player.DashVideoSource(source.src, null, estimator);
 
-    var shakaContent = document.createElement('div');
-    shakaContent.setAttribute('class', 'vjs-control-content');
-    shakaButton.appendChild(shakaContent);
+      this.shakaPlayer.load(shakaSource).then(function() {
+        player.initShakaMenus();
+      });
+    },
 
-    var shakaTitle = document.createElement('span');
-    shakaTitle.setAttribute('class', 'vjs-control-text');
-    shakaContent.appendChild(shakaTitle);
+    initShakaMenus: function() {
+      var player = this;
+      var shakaPlayer = this.shakaPlayer;
 
-    var shakaMenu = document.createElement('div');
-    shakaMenu.setAttribute('class', 'vjs-menu');
-    shakaContent.appendChild(shakaMenu);
+      player.options_['playbackRates'] = [];
+      var playerEL = player.el();
+      playerEL.className += ' vjs-shaka';
 
-    var shakaMenuContent = document.createElement('ul');
-    shakaMenuContent.setAttribute('class', 'vjs-menu-content');
-    shakaMenu.appendChild(shakaMenuContent);
+      var shakaButton = document.createElement('div');
+      shakaButton.setAttribute('class', 'vjs-shaka-button vjs-menu-button vjs-menu-button-popup vjs-control vjs-icon-cog');
 
-    var videoTracks = shakaPlayer.getVideoTracks();
+      var shakaMenu = document.createElement('div');
+      shakaMenu.setAttribute('class', 'vjs-menu');
+      shakaButton.appendChild(shakaMenu);
 
-    var el = document.createElement('li');
-    el.setAttribute('class', 'vjs-menu-item vjs-selected');
-    var label = document.createElement('span');
-    setInnerText(label, "Auto");
-    el.appendChild(label);
-    el.addEventListener('click', function(){
+      var shakaMenuContent = document.createElement('ul');
+      shakaMenuContent.setAttribute('class', 'vjs-menu-content');
+      shakaMenu.appendChild(shakaMenuContent);
+
+      var videoTracks = shakaPlayer.getVideoTracks();
+
+      var el = document.createElement('li');
+      el.setAttribute('class', 'vjs-menu-item vjs-selected');
+      var label = document.createElement('span');
+      setInnerText(label, "Auto");
+      el.appendChild(label);
+      el.addEventListener('click', function() {
         var selected = shakaMenuContent.querySelector('.vjs-selected');
         if (selected) {
-            selected.className = selected.className.replace('vjs-selected', '')
+          selected.className = selected.className.replace('vjs-selected', '')
         }
         this.className = this.className + " vjs-selected";
-        shakaPlayer.enableAdaptation(true);
-    });
-    shakaMenuContent.appendChild(el);
+        shakaPlayer.configure({ 'enableAdaptation': true });
+      });
+      shakaMenuContent.appendChild(el);
 
-    for (var i = 0 ; i < videoTracks.length; ++ i) {
-        (function () {
+      for (var i = 0; i < videoTracks.length; ++i) {
+        (function() {
           var index = videoTracks[i].id;
           var rate = (videoTracks[i].bandwidth / 1024).toFixed(0);
           var height = videoTracks[i].height;
@@ -88,25 +72,54 @@ function initMenus(player, shakaPlayer) {
           var label = document.createElement('span');
           setInnerText(label, height + "p (" + rate + "k)");
           el.appendChild(label);
-          el.addEventListener('click', function(){
-              var selected = shakaMenuContent.querySelector('.vjs-selected');
-              if (selected) {
-                  selected.className = selected.className.replace('vjs-selected', '')
-              }
-              this.className = this.className + " vjs-selected";
-              shakaPlayer.enableAdaptation(false);
-              shakaPlayer.selectVideoTrack(index, false);
-              // TODO: Make opt_clearBuffer a property of this tech 
-              // If above is set to true, you may wish to uncomment the below
-              // player.trigger('waiting');
+          el.addEventListener('click', function() {
+            var selected = shakaMenuContent.querySelector('.vjs-selected');
+            if (selected) {
+              selected.className = selected.className.replace('vjs-selected', '')
+            }
+            this.className = this.className + " vjs-selected";
+            shakaPlayer.configure({ 'enableAdaptation': false });
+            shakaPlayer.selectVideoTrack(index, false);
+            // TODO: Make opt_clearBuffer a property of this tech
+            // If above is set to true, you may wish to uncomment the below
+            // player.trigger('waiting');
           })
           shakaMenuContent.appendChild(el);
         }())
+      }
+      var controlBar = playerEL.parentNode.querySelector('.vjs-control-bar');
+
+      if (controlBar) {
+        controlBar.insertBefore(shakaButton, controlBar.lastChild);
+      }
     }
-    if (player.options()['controls']) {
-        var controlBar = playerEL.querySelectorAll('.vjs-control-bar')[0];
-        if (controlBar) {
-            controlBar.appendChild(shakaButton);
-        }
+  })
+
+  Shaka.isSupported = function() {
+    return !!window.MediaSource;
+  };
+
+  Shaka.canPlaySource = function(srcObj) {
+    if (srcObj.type === 'application/dash+xml') {
+      return 'maybe';
+    } else {
+      return '';
     }
-}                      
+  };
+
+  videojs.options.techOrder.unshift('shaka');
+
+  function setInnerText(element, text) {
+    if (typeof element === 'undefined') {
+      return false;
+    }
+    var textProperty = ('innerText' in element) ? 'innerText' : 'textContent';
+    try {
+      element[textProperty] = text;
+    } catch (anException) {
+      element.setAttribute('innerText', text);
+    }
+  }
+
+  videojs.registerTech('Shaka', Shaka);
+})();
