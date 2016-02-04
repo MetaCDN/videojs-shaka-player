@@ -62,8 +62,8 @@
 
         initShakaMenus: function() {
             this.initAudioTrackMenu();
-
-            //this.initBandwidthMenu();
+            this.initSubtitleMenu();
+            this.initBandwidthMenu();
         },
 
         initSubtitleMenu: function() {
