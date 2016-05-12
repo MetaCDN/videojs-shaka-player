@@ -18,6 +18,7 @@
 
       var video = player.el();
       this.shakaPlayer = new shaka.player.Player(video);
+      window.shakaPlayer = this.shakaPlayer;
       var estimator = new shaka.util.EWMABandwidthEstimator();
       var shakaSource;
       if (source.licenseServers && ( Object.getOwnPropertyNames(source.licenseServers).length > 0 )) {
