@@ -1,7 +1,8 @@
 (function() {
   'use strict';
 
-  var Html5 = videojs.getComponent('Html5');
+  var Html5 = videojs.getComponent('Html5'),
+      source = null;
 
   var Shaka = videojs.extend(Html5, {
     constructor: function(options, ready) {
@@ -9,7 +10,7 @@
 
       // Remove the application/dash+xml source so that the browser
       // doesn't try to play it
-      var source = options.source;
+      source = options.source;
       delete options.source;
 
       Html5.call(player, options, ready);
@@ -18,11 +19,54 @@
       var video = player.el();
       this.shakaPlayer = new shaka.player.Player(video);
       var estimator = new shaka.util.EWMABandwidthEstimator();
-      var shakaSource = new shaka.player.DashVideoSource(source.src, null, estimator);
+      var shakaSource;
+      if (source.licenseServers && ( Object.getOwnPropertyNames(source.licenseServers).length > 0 )) {
+        shakaSource = new shaka.player.DashVideoSource(source.src, player.interpretContentProtection_, estimator);
+      }
+      else {
+        shakaSource = new shaka.player.DashVideoSource(source.src, null, estimator);
+      }
 
       this.shakaPlayer.load(shakaSource).then(function() {
         player.initShakaMenus();
       });
+    },
+
+    interpretContentProtection_: function(schemeIdUri, contentProtection) {
+      /*
+        I'm expecting source to have this structure:
+
+          source: {
+              src: mpd
+              licenseServers: {
+                'widevine': 'http://servidorwidevine.com/blah',
+                'playready': 'http://servidorplayready.com/bleh'
+              }
+            }
+      */
+
+      if (schemeIdUri === "urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed") {
+        if (source.licenseServers['widevine']) {
+          return [{
+            keySystem: 'com.widevine.alpha',
+            licenseServerUrl: source.licenseServers['widevine']
+          }]
+        }
+      }
+
+
+      if (schemeIdUri === "urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95") {
+        if (source.licenseServers['playready']) {
+          return [{
+            keySystem: 'com.microsoft.playready',
+            licenseServerUrl: source.licenseServers['playready']
+          }]
+        }
+      }
+
+      console.warn('DRM not supported, source: ', source);
+      return null;
+      
     },
 
     initShakaMenus: function() {
