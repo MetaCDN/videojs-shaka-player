@@ -61,8 +61,29 @@
       shaka.polyfill.installAll();
 
       var video = player.el();
+      console.log('player.el(), video: ', video);
       this.shakaPlayer = new shaka.player.Player(video);
-      window.shakaPlayer = this.shakaPlayer;
+      /*
+      Set event listener on the current video element, in order to provide
+      a way for the outer world to communicate with us, insted of exposing
+      this.shakaPlayer in the global scope.
+      */
+      // Events to provide the audio tracks
+      videojs.on(video, "getAudioTracks", function() {
+        var audioTracks = player.shakaPlayer.getAudioTracks();
+        videojs.trigger(video, "audioTracks", { audioTracks: audioTracks });
+      });
+
+      videojs.on(video, "setAudioTrack", function(event, data) {
+        var trackId = data.audioTrackId;
+        player.shakaPlayer.selectAudioTrack( data.audioTrackId );
+      });
+
+      // Event to reload
+      videojs.on(video, "reload", function(event, data) {
+        player.reload(data.mpd, data.source);
+      });
+
       var estimator = new shaka.util.EWMABandwidthEstimator();
       var shakaSource;
       if (source.licenseServers && ( Object.getOwnPropertyNames(source.licenseServers).length > 0 )) {
@@ -72,11 +93,30 @@
         shakaSource = new shaka.player.DashVideoSource(source.src, null, estimator);
       }
 
+      player.source = shakaSource;
+
       this.shakaPlayer.load(shakaSource).then(function() {
         if (options.shakaMenus) {
           player.initShakaMenus();
         }
       });
+    },
+
+    reload: function(channelMpd, source_) {
+      this.shakaPlayer.unload();
+
+      var estimator = new shaka.util.EWMABandwidthEstimator();
+      var abrManager = new shaka.media.SimpleAbrManager();
+      var shakaSource;
+
+      if (source_) {
+        source = source_;
+      }
+
+      shakaSource = new shaka.player.DashVideoSource(
+        channelMpd, interpreContentProtection, estimator, abrManager);
+
+      this.shakaPlayer.load(shakaSource);
     },
 
     initShakaMenus: function() {
@@ -160,24 +200,6 @@
       return '';
     }
   };
-
-  Shaka.reload = function(channelMpd, source_) {
-    window.shakaPlayer.unload();
-
-    var estimator = new shaka.util.EWMABandwidthEstimator();
-    var abrManager = new shaka.media.SimpleAbrManager();
-    var shakaSource;
-
-    if (source_) {
-      source = source_;
-    }
-
-    shakaSource = new shaka.player.DashVideoSource(
-      channelMpd, interpreContentProtection, estimator, abrManager);
-
-    window.shakaPlayer.load(shakaSource);
-  };
-
 
   videojs.options.techOrder.unshift('shaka');
 
