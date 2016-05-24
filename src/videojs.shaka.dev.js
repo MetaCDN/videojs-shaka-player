@@ -1,7 +1,52 @@
 (function() {
   'use strict';
 
-  var Html5 = videojs.getComponent('Html5');
+  var Html5 = videojs.getComponent('Html5'),
+      source = null,
+      cachedlicenseServerURL,
+      widevineUrn = "urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",
+      widevineKeySys = "com.widevine.alpha",
+      playreadyUrn = "urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95",
+      playreadyKeySys = "com.microsoft.playready";
+
+
+
+  var interpreContentProtection = function(schemeIdUri, contentProtection) {
+    /*
+      I'm expecting source to have this structure:
+
+        source: {
+            src: mpd
+            licenseServers: {
+              'widevine': 'http://servidorwidevine.com/blah',
+              'playready': 'http://servidorplayready.com/bleh'
+            }
+          }
+    */
+
+    if (!source) {
+      console.warn('source has not DRM data.');
+      return null;
+    }
+
+    if ( (schemeIdUri === widevineUrn) && source.licenseServers['widevine'] ) {
+        return [{
+          keySystem: widevineKeySys,
+          licenseServerUrl: source.licenseServers['widevine']
+        }];
+    }
+
+    if ( (schemeIdUri === playreadyUrn) && source.licenseServers['playready'] ) {
+        return [{
+          keySystem: playreadyKeySys,
+          licenseServerUrl: source.licenseServers['playready']
+        }];
+    }
+
+
+    console.warn('schemeIdUri is not valid.');
+    return null;
+  };
 
   var Shaka = videojs.extend(Html5, {
     constructor: function(options, ready) {
@@ -9,20 +54,69 @@
 
       // Remove the application/dash+xml source so that the browser
       // doesn't try to play it
-      var source = options.source;
+      source = options.source;
       delete options.source;
 
       Html5.call(player, options, ready);
       shaka.polyfill.installAll();
 
       var video = player.el();
+      console.log('player.el(), video: ', video);
       this.shakaPlayer = new shaka.player.Player(video);
+      /*
+      Set event listener on the current video element, in order to provide
+      a way for the outer world to communicate with us, insted of exposing
+      this.shakaPlayer in the global scope.
+      */
+      // Events to provide the audio tracks
+      videojs.on(video, "getAudioTracks", function() {
+        var audioTracks = player.shakaPlayer.getAudioTracks();
+        videojs.trigger(video, "audioTracks", { audioTracks: audioTracks });
+      });
+
+      videojs.on(video, "setAudioTrack", function(event, data) {
+        var trackId = data.audioTrackId;
+        player.shakaPlayer.selectAudioTrack( data.audioTrackId );
+      });
+
+      // Event to reload
+      videojs.on(video, "reload", function(event, data) {
+        player.reload(data.mpd, data.source);
+      });
+
       var estimator = new shaka.util.EWMABandwidthEstimator();
-      var shakaSource = new shaka.player.DashVideoSource(source.src, null, estimator);
+      var shakaSource;
+      if (source.licenseServers && ( Object.getOwnPropertyNames(source.licenseServers).length > 0 )) {
+        shakaSource = new shaka.player.DashVideoSource(source.src, interpreContentProtection, estimator);
+      }
+      else {
+        shakaSource = new shaka.player.DashVideoSource(source.src, null, estimator);
+      }
+
+      player.source = shakaSource;
 
       this.shakaPlayer.load(shakaSource).then(function() {
-        player.initShakaMenus();
+        if (options.shakaMenus) {
+          player.initShakaMenus();
+        }
       });
+    },
+
+    reload: function(channelMpd, source_) {
+      this.shakaPlayer.unload();
+
+      var estimator = new shaka.util.EWMABandwidthEstimator();
+      var abrManager = new shaka.media.SimpleAbrManager();
+      var shakaSource;
+
+      if (source_) {
+        source = source_;
+      }
+
+      shakaSource = new shaka.player.DashVideoSource(
+        channelMpd, interpreContentProtection, estimator, abrManager);
+
+      this.shakaPlayer.load(shakaSource);
     },
 
     initShakaMenus: function() {
@@ -122,4 +216,5 @@
   }
 
   videojs.registerTech('Shaka', Shaka);
+  window.Shaka = Shaka;
 })();
