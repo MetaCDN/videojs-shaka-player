@@ -5,7 +5,7 @@ videojs.Shaka = videojs.Html5.extend({
         var video = document.getElementById(player.id_).getElementsByTagName('video')[0];
         var shakaPlayer = new shaka.player.Player(video);
         var estimator = new shaka.util.EWMABandwidthEstimator();
-        var source = new shaka.player.DashVideoSource(options.source.src, null, estimator);
+        var source = new shaka.player.DashVideoSource(options.source.src, interpretContentProtection, estimator);
         shakaPlayer.load(source).then(function(){initMenus(player, shakaPlayer)});
     }
 })
@@ -109,4 +109,81 @@ function initMenus(player, shakaPlayer) {
             controlBar.appendChild(shakaButton);
         }
     }
-}                      
+}
+
+/**
+  * Streamshark clearkey DRM interpretation
+  *
+  * @param {string} schemeIdUri The ContentProtection's scheme ID URI.
+  * @param {!Element} contentProtection The ContentProtection element.
+  * @return {!Array.<shaka.player.DrmInfo.Config>} An array of Config
+  *     objects or null if the element is not understood by this application.
+  */
+function interpretContentProtection(schemeIdUri, contentProtection) {
+    if (schemeIdUri == 'urn:uuid:1077efec-c0b2-4d02-ace3-3c1e52e2fb4b' && contentProtection.getAttribute('value') == 'SSDRM' ) {
+        var keySystem = 'org.w3.clearkey';          
+
+        var pssh = new Uint8Array([
+            0x00, 0x00, 0x00, 0x34, 0x70, 0x73, 0x73, 0x68,
+            0x01, 0x00, 0x00, 0x00, 
+            0x10, 0x77, 0xef, 0xec, 0xc0, 0xb2, 0x4d, 0x02,
+            0xac, 0xe3, 0x3c, 0x1e, 0x52, 0xe2, 0xfb, 0x4b,
+            0x00, 0x00, 0x00, 0x01, 
+        ]);
+
+        var keyId = null;
+        var licenseUrl = null;
+        var streamName = null;
+        for (var i = 0; i < contentProtection.childNodes.length; ++i) {
+            var child = contentProtection.childNodes[i];
+            if (child.nodeName == 'ssdrm:id') {
+                keyId = fromBase64(child.childNodes[0].nodeValue);
+            } else if (child.nodeName == 'ssdrm:licUrl') {
+                licenseUrl = fromBase64(child.childNodes[0].nodeValue);
+            } else if (child.nodeName == 'ssdrm:strId') {
+                streamName = fromBase64(child.childNodes[0].nodeValue);
+            }
+        }
+
+        if ( licenseUrl == null ) {
+            return null; // no license url in pssh
+        } else if ( streamName != null ) {
+            // append stream name to the license url as param
+            licenseUrl += "?ident=" + streamName;
+        }
+
+        // Wowza cenc pssh format doesn't seem to conform to new spec.  Build the version 1 PSSH box using
+        // the supplied key value.
+        var concat = null;
+        if ( keyId != null ) {
+            keyId = keyId.replace(/-/g,'');
+            var keyBytes = shaka.util.Uint8ArrayUtils.fromHex(keyId);
+            concat = new Uint8Array((pssh.length + keyBytes.length + 4));
+            concat.set(pssh, 0);
+            concat.set(keyBytes, pssh.length);
+            concat.fill(0x00, (pssh.length + keyBytes.length));
+        } else {
+            // don't set init data, pass through
+            return [{
+              'keySystem': keySystem,
+              'licenseServerUrl': licenseUrl
+            }]; 
+        }
+          
+        var initData = {
+            'initData': concat,
+            'initDataType': 'cenc'
+        };
+        return [{
+            'keySystem': keySystem,
+            'licenseServerUrl': licenseUrl,
+            'initData': initData
+        }];
+    }
+
+  return null;
+};
+
+function fromBase64(str) {
+    return window.atob(str.replace(/-/g, '+').replace(/_/g, '/'));
+};                 
