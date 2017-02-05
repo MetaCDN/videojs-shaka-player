@@ -8,20 +8,18 @@ Shaka Player Playback Technology allows Video.js users to utilize [Shaka-Player]
   - [Shaka-Player](https://github.com/google/shaka-player)
 
 ### Build
-Build script requires npm, bower and grunt.
-
-If you don't have bower or grunt, run:
-
 ```
-sudo npm install grunt
-sudo npm install grunt-cli
-sudo npm install bower
+npm install
+npm run build
 ```
 
-Finally, run ./build.sh
+### Run
+```
+npm run serve
+```
 
 ### Usage
-  - Include shaka-player.compiled.js and video.shaka.dev.js file in the html page.
+  - Include player-skin.js and player.full.js file in the html page.
   - Specify "shaka" in the techOrder array as needed.
   - Look at the included example for guidance.
   

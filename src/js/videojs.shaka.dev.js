@@ -3,7 +3,7 @@
 
   var Html5 = videojs.getComponent('Html5');
 
-  var Shaka = videojs.extend(Html5, {
+  var ShakaTech = videojs.extend(Html5, {
     constructor: function(options, ready) {
       var player = this;
 
@@ -16,11 +16,11 @@
       shaka.polyfill.installAll();
 
       var video = player.el();
-      this.shakaPlayer = new shaka.player.Player(video);
-      var estimator = new shaka.util.EWMABandwidthEstimator();
-      var shakaSource = new shaka.player.DashVideoSource(source.src, null, estimator);
+      this.shakaPlayer = new shaka.Player(video);
+      //var estimator = new shaka.util.EWMABandwidthEstimator();
+      //var shakaSource = new shaka.player.DashVideoSource(source.src, null, estimator);
 
-      this.shakaPlayer.load(shakaSource).then(function() {
+      this.shakaPlayer.load(source.src).then(function() {
         player.initShakaMenus();
       });
     },
@@ -44,7 +44,7 @@
       shakaMenuContent.setAttribute('class', 'vjs-menu-content');
       shakaMenu.appendChild(shakaMenuContent);
 
-      var videoTracks = shakaPlayer.getVideoTracks();
+      var videoTracks = shakaPlayer.getTracks();
 
       var el = document.createElement('li');
       el.setAttribute('class', 'vjs-menu-item vjs-selected');
@@ -62,30 +62,32 @@
       shakaMenuContent.appendChild(el);
 
       for (var i = 0; i < videoTracks.length; ++i) {
-        (function() {
-          var index = videoTracks[i].id;
-          var rate = (videoTracks[i].bandwidth / 1024).toFixed(0);
-          var height = videoTracks[i].height;
-          var el = document.createElement('li');
-          el.setAttribute('class', 'vjs-menu-item');
-          el.setAttribute('data-val', rate);
-          var label = document.createElement('span');
-          setInnerText(label, height + "p (" + rate + "k)");
-          el.appendChild(label);
-          el.addEventListener('click', function() {
-            var selected = shakaMenuContent.querySelector('.vjs-selected');
-            if (selected) {
-              selected.className = selected.className.replace('vjs-selected', '')
-            }
-            this.className = this.className + " vjs-selected";
-            shakaPlayer.configure({ 'enableAdaptation': false });
-            shakaPlayer.selectVideoTrack(index, false);
-            // TODO: Make opt_clearBuffer a property of this tech
-            // If above is set to true, you may wish to uncomment the below
-            // player.trigger('waiting');
-          })
-          shakaMenuContent.appendChild(el);
-        }())
+        if (videoTracks[i].type == "video") {
+          (function() {
+            var index = videoTracks[i].id;
+            var rate = (videoTracks[i].bandwidth / 1024).toFixed(0);
+            var height = videoTracks[i].height;
+            var el = document.createElement('li');
+            el.setAttribute('class', 'vjs-menu-item');
+            el.setAttribute('data-val', rate);
+            var label = document.createElement('span');
+            setInnerText(label, height + "p (" + rate + "k)");
+            el.appendChild(label);
+            el.addEventListener('click', function() {
+              var selected = shakaMenuContent.querySelector('.vjs-selected');
+              if (selected) {
+                selected.className = selected.className.replace('vjs-selected', '')
+              }
+              this.className = this.className + " vjs-selected";
+              shakaPlayer.configure({ 'enableAdaptation': false });
+              shakaPlayer.selectTrack(index, false);
+              // TODO: Make opt_clearBuffer a property of this tech
+              // If above is set to true, you may wish to uncomment the below
+              // player.trigger('waiting');
+            })
+            shakaMenuContent.appendChild(el);
+          }())
+        }
       }
       var controlBar = playerEL.parentNode.querySelector('.vjs-control-bar');
 
@@ -95,11 +97,11 @@
     }
   })
 
-  Shaka.isSupported = function() {
+  ShakaTech.isSupported = function() {
     return !!window.MediaSource;
   };
 
-  Shaka.canPlaySource = function(srcObj) {
+  ShakaTech.canPlaySource = function(srcObj) {
     if (srcObj.type === 'application/dash+xml') {
       return 'maybe';
     } else {
@@ -121,5 +123,5 @@
     }
   }
 
-  videojs.registerTech('Shaka', Shaka);
+  videojs.registerTech('Shaka', ShakaTech);
 })();
