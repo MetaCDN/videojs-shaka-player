@@ -1,6 +1,6 @@
 {
   "name": "videojs-shaka-player",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shaka Player playback technology for Video.js",
   "main": "src/videojs.shaka.dev.js",
   "scripts": {
@@ -11,10 +11,31 @@
     "type": "git",
     "url": "git://github.com/MetaCDN/videojs-shaka-player.git"
   },
+  "contributors": [
+    {
+      "name": "James Broberg",
+      "email": "james.broberg@metacdn.com"
+    }
+  ],
+  "engines": {
+    "node": ">= 5.0.0"
+  },
   "license": "Apache-2.0",
+  "scripts": {
+    "build": "mkdir -p dist & npm run build-js & npm run build-css",
+    "build-js": "browserify ./src/js/player.js > ./dist/player.full.js",
+    "build-css": "browserify -g browserify-css ./src/js/player-skin.js -o ./dist/player-skin.js",
+    "serve": "npm run build & nodemon ./server.js",
+    "clean": "rm -rf dist & rm -rf node_modules"
+  },
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-bowercopy": "^1.2.3",
-    "load-grunt-tasks": "^3.2.0"
+    "browserify": "13.0.0",
+    "browserify-css": "0.9.1",
+    "video.js": "^5.11.9",
+    "shaka-player": "2.0.5",
+    "express": "4.13.4",
+    "express-http-proxy": "0.6.0",
+    "cors": "2.7.1",
+    "nodemon": "1.9.1"
   }
 }

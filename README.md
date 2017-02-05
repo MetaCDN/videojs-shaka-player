@@ -2,29 +2,25 @@
 
 Shaka Player Playback Technology allows Video.js users to utilize [Shaka-Player](https://github.com/google/shaka-player) to playback MPEG DASH videos. This project is still under development, more features and enhancements will be available later.
 
-If you want VideoJS 5 support, check out the vjs5 branch of this project.
-
 ### Dependencies
   - [Video.js](https://github.com/videojs)
   - [Video.js Font](https://github.com/videojs/font)
   - [Shaka-Player](https://github.com/google/shaka-player)
 
 ### Build
-Build script requires npm, bower and grunt.
-
-If you don't have bower or grunt, run:
+```
+npm install
+npm run build
 
 ```
-sudo npm install grunt
-sudo npm install grunt-cli
-sudo npm install bower
-sudo npm install grunt-contrib-connect
-```
 
-Finally, run ./build.sh
+### Run
+```
+npm run serve
+```
 
 ### Usage
-  - Include shaka-player.compiled.js and video.shaka.dev.js file in the html page.
+  - Include player-skin.js and player.full.js file in the html page.
   - Specify "shaka" in the techOrder array as needed.
   - Look at the included example for guidance.
   
