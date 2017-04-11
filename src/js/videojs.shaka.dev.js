@@ -20,6 +20,12 @@
       //var estimator = new shaka.util.EWMABandwidthEstimator();
       //var shakaSource = new shaka.player.DashVideoSource(source.src, null, estimator);
 
+      this.shakaPlayer.configure({
+          abr: {
+              enabled: true
+          }
+      })
+
       this.shakaPlayer.load(source.src).then(function() {
         player.initShakaMenus();
       });
