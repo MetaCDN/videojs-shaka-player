@@ -64,7 +64,7 @@
       for (var i = 0; i < videoTracks.length; ++i) {
         if (videoTracks[i].type == "video") {
           (function() {
-            var index = videoTracks[i].id;
+            var track = videoTracks[i];
             var rate = (videoTracks[i].bandwidth / 1024).toFixed(0);
             var height = videoTracks[i].height;
             var el = document.createElement('li');
@@ -80,7 +80,7 @@
               }
               this.className = this.className + " vjs-selected";
               shakaPlayer.configure({ 'enableAdaptation': false });
-              shakaPlayer.selectTrack(index, false);
+              shakaPlayer.selectTrack(track, false);
               // TODO: Make opt_clearBuffer a property of this tech
               // If above is set to true, you may wish to uncomment the below
               // player.trigger('waiting');
