@@ -32,7 +32,7 @@
     "browserify": "13.0.0",
     "browserify-css": "0.9.1",
     "video.js": "^5.11.9",
-    "shaka-player": "2.0.5",
+    "shaka-player": "2.0.8",
     "express": "4.13.4",
     "express-http-proxy": "0.6.0",
     "cors": "2.7.1",
