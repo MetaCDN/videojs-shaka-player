@@ -50,7 +50,7 @@
       shakaMenuContent.setAttribute('class', 'vjs-menu-content');
       shakaMenu.appendChild(shakaMenuContent);
 
-      var videoTracks = shakaPlayer.getTracks();
+      var videoTracks = shakaPlayer.getVariantTracks();
 
       var el = document.createElement('li');
       el.setAttribute('class', 'vjs-menu-item vjs-selected');
