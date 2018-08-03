@@ -50,7 +50,7 @@
       shakaMenuContent.setAttribute('class', 'vjs-menu-content');
       shakaMenu.appendChild(shakaMenuContent);
 
-      var videoTracks = shakaPlayer.getTracks();
+      var videoTracks = shakaPlayer.getVariantTracks();
 
       var el = document.createElement('li');
       el.setAttribute('class', 'vjs-menu-item vjs-selected');
@@ -86,7 +86,7 @@
               }
               this.className = this.className + " vjs-selected";
               shakaPlayer.configure({abr: {enabled: false}});
-              shakaPlayer.selectTrack(track, false);
+              shakaPlayer.selectVariantTrack(track, false);
               // TODO: Make opt_clearBuffer a property of this tech
               // If above is set to true, you may wish to uncomment the below
               // player.trigger('waiting');
